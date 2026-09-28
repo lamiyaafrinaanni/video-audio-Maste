@@ -1,0 +1,8 @@
+{
+  "name": "ভিডিও বিশ্লেষক AI (Video Insight AI)",
+  "description": "একটি শক্তিশালী AI ও MCP সক্ষম টুল যা ভিডিও বিশ্লেষণ, সারসংক্ষেপ, মাল্টি-প্ল্যাটফর্ম ভিডিও ডাউনলোডার ও রিভলভার (YouTube, TikTok, Instagram, Direct MP4), অডিও ট্রান্সক্রিপশন এবং পিডিএফ রিপোর্ট প্রদান করে।",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
