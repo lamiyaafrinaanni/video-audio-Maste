@@ -278,7 +278,31 @@ export const VideoInputPanel: React.FC<VideoInputPanelProps> = ({
               </label>
 
               <div className="grid grid-cols-1 gap-2">
-                {/* 1. Learning Points */}
+                {/* 1. Goal Category */}
+                <button
+                  type="button"
+                  onClick={() => setAnalysisMode('goal_category')}
+                  className={`app-mode-btn ${
+                    analysisMode === 'goal_category' ? 'app-mode-btn-active-indigo border-indigo-600 dark:border-indigo-400 bg-indigo-50/20' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-bold flex items-center gap-2 text-sm text-[var(--text-primary)]">
+                      <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      {isBn ? "বিশ্লেষণের লক্ষ্য ও ক্যাটাগরি" : "Analysis Goal & Category"}
+                    </span>
+                    {analysisMode === 'goal_category' && (
+                      <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
+                    )}
+                  </div>
+                  <span className="text-[11px] text-[var(--text-muted)] leading-relaxed pl-6">
+                    {isBn 
+                      ? "মূল লক্ষ্য, ভিডিওর শ্রেণিবিভাগ বা ক্যাটাগরি এবং বিস্তারিত ডোমেন বিশ্লেষণ।" 
+                      : "Core analysis objective, video categorization, and specific domain classification."}
+                  </span>
+                </button>
+
+                {/* 2. Learning Points */}
                 <button
                   type="button"
                   onClick={() => setAnalysisMode('learning_points')}
@@ -302,7 +326,7 @@ export const VideoInputPanel: React.FC<VideoInputPanelProps> = ({
                   </span>
                 </button>
 
-                {/* 2. Problem Solving */}
+                {/* 3. Problem Solving */}
                 <button
                   type="button"
                   onClick={() => setAnalysisMode('problem_solving')}
@@ -326,7 +350,7 @@ export const VideoInputPanel: React.FC<VideoInputPanelProps> = ({
                   </span>
                 </button>
 
-                {/* 3. Standard Mode */}
+                {/* 4. Standard Mode */}
                 <button
                   type="button"
                   onClick={() => setAnalysisMode('standard')}
@@ -915,6 +939,24 @@ export const VideoInputPanel: React.FC<VideoInputPanelProps> = ({
                         </button>
                       )}
 
+                      {/* Deselect / বাছাই বাতিল Button */}
+                      {(isCompareSelectionMode || compareFrameA || compareFrameB) && (
+                        <button
+                          type="button"
+                          id="btn-deselect-frames"
+                          onClick={() => {
+                            setIsCompareSelectionMode(false);
+                            setCompareFrameA(null);
+                            setCompareFrameB(null);
+                          }}
+                          className="text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-1 rounded-md flex items-center gap-1 cursor-pointer transition-colors active:scale-95 shadow-xs"
+                          title={isBn ? "সব নির্বাচন বা তুলনা বাতিল করুন" : "Deselect and cancel compare mode"}
+                        >
+                          <X className="w-3 h-3 text-red-500" />
+                          <span>{isBn ? "বাছাই বাতিল" : "Deselect"}</span>
+                        </button>
+                      )}
+
                       {/* Download Highlights JSON Button */}
                       <button
                         type="button"
@@ -1353,6 +1395,19 @@ export const VideoInputPanel: React.FC<VideoInputPanelProps> = ({
                     <span>{isBn ? "অডিও এক্সট্রাক্ট ও টেক্সট ট্রান্সক্রিপ্ট" : "Extract Audio & Transcribe"}</span>
                   </>
                 )}
+              </button>
+
+              {/* Additional Direct Audio To Text Action Button */}
+              <button
+                type="button"
+                id="btn-audio-to-text-direct-act"
+                onClick={onExtractAudioAndTranscribe}
+                disabled={isExtractingAudio || isAnalyzing}
+                className="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 via-indigo-600 to-teal-500 hover:from-indigo-600 hover:via-indigo-700 hover:to-teal-600 text-white rounded-xl text-xs font-extrabold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer min-h-[44px] active:scale-98 border border-indigo-400/20"
+                title={isBn ? "ভিডিওর ভয়েস বা অডিও সরাসরি টেক্সটে রূপান্তর করুন" : "Directly transcribe video speech and audio track to text"}
+              >
+                <Volume2 className="w-4 h-4 text-white animate-pulse" />
+                <span>{isBn ? "🎙️ অডিও থেকে টেক্সট (Audio To Text)" : "🎙️ Audio To Text (Speech-to-Text)"}</span>
               </button>
 
               {/* Action 2: Start AI Deep Video Analysis */}

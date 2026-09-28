@@ -44,7 +44,7 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
-  const [viewMode, setViewMode] = useState<'segments' | 'fulltext'>('segments');
+  const [viewMode, setViewMode] = useState<'segments' | 'verbatim' | 'fulltext'>('segments');
   const [copied, setCopied] = useState(false);
   const [copiedSegmentId, setCopiedSegmentId] = useState<string | null>(null);
 
@@ -573,56 +573,112 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
       </div>
 
       {/* Text-to-Speech (TTS) Voice Read-Aloud & Voice Dictation Control Bar */}
-      <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-xl p-3.5 space-y-3 shadow-2xs">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3.5 shadow-md text-white">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           
           {/* TTS Read Aloud Control Group */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 shrink-0">
-              <Volume2 className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-full bg-indigo-600 text-white shrink-0 shadow-sm animate-pulse">
+              <Volume2 className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                <span>{lang === 'bn' ? "টেক্সট-টু-স্পিচ (TTS) পড়া শুনুন" : "Text-to-Speech (TTS) Voice Read Aloud"}</span>
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-200 flex items-center gap-2">
+                <span>{lang === 'bn' ? "🔊 এআই টিটিএস ভয়েস প্লেয়ার বার" : "🔊 Dedicated AI TTS Voice Player Bar"}</span>
                 {isTtsSpeaking && (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold border border-emerald-300 dark:border-emerald-800 animate-pulse">
-                    🔊 {isTtsPaused ? (lang === 'bn' ? 'পজ করা আছে' : 'Paused') : (lang === 'bn' ? 'পড়া হচ্ছে...' : 'Speaking...')}
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-extrabold animate-pulse">
+                    {isTtsPaused ? (lang === 'bn' ? 'পজ করা' : 'PAUSED') : (lang === 'bn' ? 'চলছে' : 'PLAYING')}
                   </span>
                 )}
               </h4>
-              <p className="text-[11px] text-[var(--text-muted)]">
-                {lang === 'bn' ? "ট্রান্সক্রিপ্টের প্রতিটি বাক্য স্পষ্ট ভয়েসে শুনুন" : "Listen to the verbatim transcript read aloud with natural speech synthesis"}
+              <p className="text-[10px] text-slate-400 font-mono">
+                {lang === 'bn' ? "স্পিচ সিন্থেসিস প্রযুক্তিতে বাক্য শ্রবণ" : "Verbatim Text-to-Speech narrated audio stream"}
               </p>
             </div>
           </div>
 
-          {/* TTS Playback Controls */}
-          <div className="flex items-center gap-2 flex-wrap ml-auto">
-            {/* Speed Selector */}
-            <div className="flex bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-lg p-0.5 text-[10px] font-mono">
-              {[0.75, 1.0, 1.25, 1.5, 2.0].map((rate) => (
+          {/* Dedicated Media Controls */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+            
+            {/* Play/Pause/Resume Toggle Switch */}
+            <div className="flex items-center gap-1.5">
+              {!isTtsSpeaking ? (
                 <button
-                  key={rate}
                   type="button"
-                  onClick={() => setTtsRate(rate)}
-                  className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                    ttsRate === rate
-                      ? 'bg-indigo-600 text-white font-bold shadow-2xs'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
+                  onClick={() => handleStartTts(0)}
+                  className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-md transition-all"
+                  title={lang === 'bn' ? "প্লে করুন" : "Play TTS Audio"}
                 >
-                  {rate}x
+                  <Play className="w-3.5 h-3.5 fill-current text-white" />
+                  <span>{lang === 'bn' ? "প্লে" : "Play"}</span>
                 </button>
-              ))}
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={isTtsPaused ? handleResumeTts : handlePauseTts}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 ${
+                      isTtsPaused ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                    }`}
+                    title={isTtsPaused ? "চালু করুন" : "পজ করুন"}
+                  >
+                    {isTtsPaused ? (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>{lang === 'bn' ? "প্লে" : "Play"}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Pause className="w-3.5 h-3.5 fill-current" />
+                        <span>{lang === 'bn' ? "পজ" : "Pause"}</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Stop Button */}
+                  <button
+                    type="button"
+                    onClick={handleStopTts}
+                    className="p-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-white cursor-pointer transition-all active:scale-95 shadow-md"
+                    title={lang === 'bn' ? "থামুন" : "Stop"}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Voice Dropdown Selector if voices loaded */}
+            {/* Request-Specific Speed Selector (0.5x, 1x, 1.5x) */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider hidden sm:inline mr-1">{lang === 'bn' ? "গতি:" : "Speed:"}</span>
+              <div className="flex bg-slate-800 border border-slate-700 rounded-lg p-0.5 text-[10px] font-mono">
+                {[
+                  { value: 0.5, label: '0.5x' },
+                  { value: 1.0, label: '1x' },
+                  { value: 1.5, label: '1.5x' }
+                ].map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setTtsRate(item.value)}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      ttsRate === item.value
+                        ? 'bg-indigo-600 text-white font-extrabold shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Voice Dropdown Selector if multiple voices available */}
             {availableVoices.length > 0 && (
               <select
                 value={selectedVoiceIndex}
                 onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
-                className="px-2 py-1 bg-[var(--surface-muted)] text-[var(--text-primary)] text-[11px] font-semibold rounded-lg border border-[var(--border-subtle)] cursor-pointer focus:outline-none max-w-[140px] truncate"
-                title={lang === 'bn' ? "TTS কণ্ঠ নির্বাচন করুন" : "Select TTS Voice"}
+                className="px-2 py-1.5 bg-slate-800 text-slate-100 text-[10px] font-bold rounded-lg border border-slate-700 cursor-pointer focus:outline-none max-w-[130px] truncate"
+                title={lang === 'bn' ? "ভয়েস কণ্ঠ" : "Voice Accent"}
               >
                 {availableVoices.map((v, i) => (
                   <option key={i} value={i}>
@@ -632,79 +688,28 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
               </select>
             )}
 
-            {/* Play / Pause / Stop TTS Buttons */}
-            {!isTtsSpeaking ? (
-              <button
-                type="button"
-                onClick={() => handleStartTts(0)}
-                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all active:scale-95"
-                title={lang === 'bn' ? "সম্পূর্ণ ট্রান্সক্রিপ্ট পড়া শুনুন" : "Read aloud entire transcript"}
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>{lang === 'bn' ? "পড়া শুনুন (TTS)" : "Read Aloud"}</span>
-              </button>
-            ) : isTtsPaused ? (
-              <button
-                type="button"
-                onClick={handleResumeTts}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all active:scale-95"
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>{lang === 'bn' ? "পুনরায় চালু" : "Resume"}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handlePauseTts}
-                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all active:scale-95"
-              >
-                <Pause className="w-3.5 h-3.5 fill-current" />
-                <span>{lang === 'bn' ? "পজ" : "Pause"}</span>
-              </button>
-            )}
-
-            {isTtsSpeaking && (
-              <button
-                type="button"
-                onClick={handleStopTts}
-                className="p-1.5 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 hover:bg-red-200 rounded-lg cursor-pointer transition-all active:scale-95"
-                title={lang === 'bn' ? "থামুন" : "Stop TTS"}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Voice Dictation (Mic Speech-to-Text Input) Button */}
+            {/* Voice Dictation (Mic Input) */}
             <button
               type="button"
               onClick={toggleVoiceDictation}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 border ${
                 isDictating
-                  ? 'bg-red-600 text-white border-red-600 animate-pulse'
-                  : 'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)]'
+                  ? 'bg-red-600 text-white border-red-600 animate-pulse shadow-md'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-750 border-slate-750'
               }`}
-              title={lang === 'bn' ? "মাইক্রোফোনে কথা বলে ট্রান্সক্রিপ্টে যুক্ত করুন" : "Dictate with microphone to transcribe text"}
+              title={lang === 'bn' ? "মাইক্রোফোনে কথা বলে ট্রান্সক্রিপ্টে যুক্ত করুন" : "Dictate with microphone"}
             >
-              {isDictating ? (
-                <>
-                  <Mic className="w-3.5 h-3.5 text-white animate-bounce" />
-                  <span>{lang === 'bn' ? "শুনছি..." : "Listening..."}</span>
-                </>
-              ) : (
-                <>
-                  <Mic className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                  <span>{lang === 'bn' ? "ভয়েস ডিক্টেশন" : "Dictate"}</span>
-                </>
-              )}
+              <Mic className={`w-3.5 h-3.5 ${isDictating ? 'text-white animate-bounce' : 'text-indigo-400'}`} />
+              <span>{isDictating ? (lang === 'bn' ? "শুনছি" : "Listening") : (lang === 'bn' ? "ডিক্টেশন" : "Dictate")}</span>
             </button>
           </div>
         </div>
 
         {/* Live Interim Dictation Feedback */}
         {isDictating && (
-          <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-xs font-medium text-[var(--text-primary)] flex items-center gap-2">
+          <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-xs font-medium text-slate-300 flex items-center gap-2 animate-pulse">
             <Mic className="w-4 h-4 text-red-500 animate-ping shrink-0" />
-            <span className="italic text-[var(--text-secondary)]">
+            <span className="italic">
               {dictationInterim || (lang === 'bn' ? "কথা বলুন... মাইক্রোফোন শুনছে" : "Speak now... listening to microphone")}
             </span>
           </div>
@@ -785,6 +790,7 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
             {/* View Mode Toggle */}
             <div className="flex bg-neutral-100 p-0.5 rounded border border-neutral-200 text-[10px]">
               <button
+                type="button"
                 onClick={() => setViewMode('segments')}
                 className={`px-2.5 py-1 rounded transition-all flex items-center gap-1 ${
                   viewMode === 'segments' ? 'bg-white shadow-xs font-bold text-black' : 'text-neutral-600 hover:text-black'
@@ -794,6 +800,18 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
                 <span>{t.timestampView}</span>
               </button>
               <button
+                type="button"
+                onClick={() => setViewMode('verbatim')}
+                className={`px-2.5 py-1 rounded transition-all flex items-center gap-1 ${
+                  viewMode === 'verbatim' ? 'bg-white shadow-xs font-bold text-black' : 'text-neutral-600 hover:text-black'
+                }`}
+                title={lang === 'bn' ? "স্পিচ থেকে সরাসরি সংগৃহীত হুবহু ভয়েস ফরম্যাট" : "Exact verbatim script output of the original voice"}
+              >
+                <Mic className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                <span>{lang === 'bn' ? "হুবহু ভয়েস" : "Verbatim Voice"}</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => setViewMode('fulltext')}
                 className={`px-2.5 py-1 rounded transition-all flex items-center gap-1 ${
                   viewMode === 'fulltext' ? 'bg-white shadow-xs font-bold text-black' : 'text-neutral-600 hover:text-black'
@@ -830,6 +848,24 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
               >
                 <Subtitles className="w-3.5 h-3.5" />
               </button>
+
+              {onRetranscribe && (
+                <button
+                  type="button"
+                  id="btn-prominent-audio-to-text"
+                  onClick={onRetranscribe}
+                  disabled={isTranscribing}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-600 hover:from-indigo-700 hover:via-indigo-800 hover:to-indigo-700 text-white rounded-lg transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-sm shrink-0 border border-indigo-500"
+                  title={lang === 'bn' ? "ভিডিওর মূল ভয়েস থেকে হুবহু টেক্সট ট্রান্সক্রিপ্ট করুন" : "Explicitly transcribe the original video audio track word-for-word"}
+                >
+                  <Mic className={`w-3 h-3 ${isTranscribing ? 'animate-spin text-white' : 'text-amber-200'}`} />
+                  <span>
+                    {isTranscribing
+                      ? (lang === 'bn' ? "প্রসেস হচ্ছে..." : "Transcribing...")
+                      : (lang === 'bn' ? "অডিও থেকে টেক্সট" : "Audio to Text")}
+                  </span>
+                </button>
+              )}
 
               {onRetranscribe && (
                 <button
@@ -954,6 +990,104 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
                 </div>
               );
             })}
+          </div>
+        ) : viewMode === 'verbatim' ? (
+          /* Exact Verbatim Original Voice View Mode */
+          <div className="space-y-3.5">
+            <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl flex items-center gap-2 text-xs text-indigo-800 dark:text-indigo-300">
+              <Mic className="w-4 h-4 text-indigo-600 shrink-0" />
+              <div className="font-semibold">
+                {lang === 'bn' 
+                  ? "🎙️ মূল ভয়েস ভেরbatim আউটপুট: অডিও ট্র্যাকে উচ্চারিত শব্দসমূহ হুবহু নিচে তালিকাভুক্ত করা হয়েছে।" 
+                  : "🎙️ Original Voice Verbatim Output: Spoken words transcribed exactly as uttered with zero paraphrasing."}
+              </div>
+            </div>
+
+            <div className="divide-y divide-neutral-100 dark:divide-slate-800">
+              {transcript.segments.map((seg, idx) => {
+                const isCurrentPlaying =
+                  videoCurrentTime >= seg.start && videoCurrentTime <= (seg.end ?? seg.start + 4);
+                const isMatched = matches.some((m) => m.segmentId === seg.id);
+                const isActiveMatch =
+                  matches.length > 0 && matches[currentMatchIndex]?.segmentId === seg.id;
+                
+                const wordCount = seg.text.split(/\s+/).filter(Boolean).length;
+                const charCount = seg.text.length;
+
+                return (
+                  <div
+                    key={`verb_${seg.id || idx}`}
+                    className={`py-3 px-2 flex flex-col sm:flex-row items-start gap-3 transition-colors ${
+                      isActiveMatch
+                        ? 'bg-amber-50/70 border-amber-300'
+                        : isCurrentPlaying
+                        ? 'bg-emerald-50/60'
+                        : 'hover:bg-neutral-50/40'
+                    }`}
+                  >
+                    {/* Timestamp Trigger & Verbatim Label */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => onSeekVideo?.(seg.start)}
+                        className="px-2.5 py-1 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg text-[10px] font-mono flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
+                        title={t.seekTooltip}
+                      >
+                        <Play className="w-2.5 h-2.5 fill-current" />
+                        <span>{seg.timestamp}</span>
+                      </button>
+
+                      <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                        {seg.speaker || (lang === 'bn' ? "বক্তা" : "Speaker")}
+                      </span>
+                    </div>
+
+                    {/* Dialogue Text with details */}
+                    <div className="flex-1 space-y-1">
+                      <p className="text-xs text-[var(--text-primary)] font-medium leading-relaxed">
+                        {renderHighlightedText(seg.text, searchQuery, isActiveMatch)}
+                      </p>
+                      <div className="flex items-center gap-3 text-[10px] text-[var(--text-light)] font-mono">
+                        <span>📊 {wordCount} {lang === 'bn' ? "শব্দ" : "words"}</span>
+                        <span>•</span>
+                        <span>📝 {charCount} {lang === 'bn' ? "অক্ষর" : "chars"}</span>
+                        <span>•</span>
+                        <span>⏱️ {seg.start.toFixed(2)}s - {seg.end ? seg.end.toFixed(2) : (seg.start + 3).toFixed(2)}s</span>
+                      </div>
+                    </div>
+
+                    {/* Verbatim Listen & Copy Actions */}
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => handleSpeakSingleSegment(seg.id, seg.text)}
+                        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                          activeTtsSegmentId === seg.id
+                            ? 'bg-indigo-600 border-indigo-600 text-white'
+                            : 'border-[var(--border-subtle)] bg-[var(--surface-card)] text-[var(--text-secondary)] hover:text-indigo-600 dark:hover:text-indigo-400'
+                        }`}
+                        title={lang === 'bn' ? "এই লাইনটি শুনুন" : "Listen to this exact sentence"}
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopySegment(seg.id, seg.text)}
+                        className="p-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                        title={lang === 'bn' ? "অনুলিপি করুন" : "Copy verbatim text"}
+                      >
+                        {copiedSegmentId === seg.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ) : (
           /* Full Continuous Paragraph View */

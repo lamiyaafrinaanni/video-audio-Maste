@@ -97,14 +97,14 @@ export function blobToBase64(blob: Blob): Promise<string> {
 }
 
 /**
- * Extracts audio track from a video File in the browser using Web Audio API,
+ * Extracts audio track from a video File or Blob in the browser using Web Audio API,
  * downmixes to 16kHz mono (speech-optimized), and packages into WAV.
  */
 export async function extractAudioFromVideoFile(
-  videoFile: File,
+  videoFile: Blob | File,
   onProgress?: (status: string) => void
 ): Promise<ExtractedAudioResult> {
-  onProgress?.('ভিডিও ফাইল থেকে অডিও ডেটা রিড করা হচ্ছে... (Reading video file...)');
+  onProgress?.('ভিডিও ফাইল বা লিঙ্ক থেকে অডিও ডেটা রিড করা হচ্ছে... (Reading video data...)');
 
   // 1. Read file as ArrayBuffer
   const arrayBuffer = await videoFile.arrayBuffer();

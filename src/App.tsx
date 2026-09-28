@@ -824,21 +824,39 @@ export function App() {
         duration: durationSec,
       };
 
+      let extractedAudio = null;
+
       if (videoFile) {
         setAudioExtractionStatus(lang === 'bn' ? 'ব্রাউজার থেকে অডিও চ্যানেল আলাদা করা হচ্ছে...' : 'Extracting audio channels...');
-        const result = await extractAudioFromVideoFile(videoFile, (msg: string) => {
+        extractedAudio = await extractAudioFromVideoFile(videoFile, (msg: string) => {
           setAudioExtractionStatus(msg);
         });
-        durationSec = result.durationSeconds;
-        audioUrl = result.audioUrl;
-        formattedSize = result.formattedSize;
+      } else if (videoUrl) {
+        setAudioExtractionStatus(lang === 'bn' ? 'ভিডিও লিঙ্ক থেকে অডিও ট্র্যাক আলাদা করা হচ্ছে...' : 'Extracting audio track from video link...');
+        try {
+          // Attempt to download and extract audio directly via our stream proxy to bypass CORS
+          const proxyUrl = `/api/video/download-stream?url=${encodeURIComponent(videoUrl)}&filename=temp_video.mp4`;
+          const response = await fetch(proxyUrl);
+          if (response.ok) {
+            const blob = await response.blob();
+            extractedAudio = await extractAudioFromVideoFile(blob, (msg: string) => {
+              setAudioExtractionStatus(msg);
+            });
+          }
+        } catch (err) {
+          console.warn("Direct CORS bypass audio extraction failed, sending metadata only:", err);
+        }
+      }
 
-        payload.audioData = result.audioBase64;
+      if (extractedAudio) {
+        durationSec = extractedAudio.durationSeconds;
+        audioUrl = extractedAudio.audioUrl;
+        formattedSize = extractedAudio.formattedSize;
+
+        payload.audioData = extractedAudio.audioBase64;
         payload.mimeType = 'audio/wav';
         payload.duration = durationSec;
       } else {
-        // Web URL (YouTube, Vimeo, direct MP4, etc.) - Send videoUrl to server without browser CORS fetch
-        setAudioExtractionStatus(lang === 'bn' ? 'ভিডিও লিঙ্ক থেকে স্পিচ অডিও প্রসেস করা হচ্ছে...' : 'Processing audio track from video URL...');
         payload.videoUrl = videoUrl || videoPreview;
       }
 

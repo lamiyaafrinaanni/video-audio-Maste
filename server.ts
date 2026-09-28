@@ -518,7 +518,14 @@ function generateIntelligentFallbackReport(params: {
   report += notice;
 
   if (isBn) {
-    if (mode === 'problem_solving') {
+    if (mode === 'goal_category') {
+      report += `## বিশ্লেষণের লক্ষ্য ও ক্যাটাগরি (Analysis Goal & Category Report)
+
+### 🎯 বিশ্লেষণের মূল লক্ষ্য ও উদ্দেশ্য
+- **প্রধান লক্ষ্য**: ভিডিওটির মূল লক্ষ্য হলো দর্শকদের একটি অত্যন্ত সূক্ষ্ম, পরিষ্কার এবং কার্যকর ধারণাগত ওভারভিউ প্রদান করা।${hasHighlights ? ` বিশেষভাবে ইউজার কর্তৃক হাইলাইটকৃত টাইমস্ট্যাম্পসমূহ (${params.highlights?.map(h => `${h.timestamp}s`).join(', ')}) এই লক্ষ্যের সাথে সুনির্দিষ্টভাবে জড়িত।` : ''}
+- **ভিডিওর শ্রেণিবিভাগ ও ক্যাটাগরি**: ভিডিওটি "শিক্ষামূলক টিউটোরিয়াল এবং ব্যবহারিক সমাধান গাইড" (Educational Tutorial & Practical Solution) ক্যাটাগরির অন্তর্ভুক্ত।
+- **বিস্তারিত ডোমেন বিশ্লেষণ**: এটি মূল প্রসেস ডিজাইন, ভিজ্যুয়াল কম্পোজিশন, সিস্টেমের কার্যকারিতা বিশ্লেষণ এবং রিয়েল-টাইম ডোমেন অপ্টিমাইজেশন নিয়ে কাজ করে।`;
+    } else if (mode === 'problem_solving') {
       report += `## সমস্যা ও কার্যকর সমাধান বিশ্লেষণ (Problems & Solutions Report)
 
 ### ১. ভিডিওর মূল বিষয়বস্তু ও প্রযুক্তিগত প্রতিবন্ধকতা
@@ -587,7 +594,14 @@ function generateIntelligentFallbackReport(params: {
     }
   } else {
     // English
-    if (mode === 'problem_solving') {
+    if (mode === 'goal_category') {
+      report += `## Analysis Goal & Category Report
+
+### 🎯 Analysis Goal & Classification
+- **Core Analysis Objective**: To provide an exhaustive conceptual overview, precise procedural walkthrough, and functional breakdown of the video's subject matter.${hasHighlights ? ` Corresponds directly with critical user timeline marks at (${params.highlights?.map(h => `${h.timestamp}s`).join(', ')}).` : ''}
+- **Category Classification**: Classified as "Educational Training Video & Practical Technical Walkthrough" under professional instructional domains.
+- **Detailed Domain Analysis**: Focuses on workflow architectural design, sequential concept articulation, system operations optimization, and performance quality verification.`;
+    } else if (mode === 'problem_solving') {
       report += `## Problem & Solution Analysis Report
 
 ### 1. Primary Operational Bottlenecks & Execution Friction
@@ -673,7 +687,14 @@ async function executeVideoAnalysis(params: {
 
   let basePrompt = '';
   if (lang === 'bn') {
-    if (mode === 'problem_solving') {
+    if (mode === 'goal_category') {
+      basePrompt = `ভিডিওর বিষয়বস্তু নিখুঁতভাবে বিশ্লেষণ করে এর মূল লক্ষ্য (core objectives) এবং শ্রেণিবিভাগ বা ক্যাটাগরি (category) সনাক্ত করুন। ভিডিওটি কোন ডোমেনে কাজ করছে তা বিস্তারিত ব্যাখ্যা করুন। নিম্নের কাঠামোগত বিন্যাসে বিশ্লেষণটি উপস্থাপন করুন:
+### 🎯 বিশ্লেষণের মূল লক্ষ্য ও উদ্দেশ্য
+- **প্রধান লক্ষ্য**: [ভিডিওর মূল উদ্দেশ্য ও বিষয়বস্তুর কেন্দ্রবিন্দু]
+- **ভিডিওর শ্রেণিবিভাগ ও ক্যাটাগরি**: [ভিডিওটি কোন নির্দিষ্ট ক্যাটাগরি বা ডোমেনের অন্তর্ভুক্ত (যেমন: শিক্ষা, টিউটোরিয়াল, বিনোদন, টেকনিক্যাল ইত্যাদি) এবং কেন]
+- **বিস্তারিত ডোমেন বিশ্লেষণ**: [ভিডিওতে ব্যবহৃত মূল প্রযুক্তি, ধারণা বা ডোমেন জ্ঞান বিশ্লেষণ করুন]
+সবকিছু বাংলা ভাষায় লিখুন এবং সুন্দর ও আকর্ষণীয় মার্কডাউন ফরম্যাটে সাজিয়ে দিন।`;
+    } else if (mode === 'problem_solving') {
       basePrompt = `ভিডিওর বিষয়বস্তু নিখুঁতভাবে বিশ্লেষণ করে আলোচিত সকল সমস্যাগুলো সনাক্ত করুন। প্রতিটি সমস্যার জন্য সম্ভাব্য সমাধান এবং তাৎক্ষণিক পদক্ষেপগুলো (actionable steps) প্রদান করুন। নিম্নের কাঠামোগত বিন্যাসে বিশ্লেষণটি উপস্থাপন করুন:
 ### [সমস্যার সংক্ষিপ্ত শিরোনাম]
 - **চিহ্নিত সমস্যা**: [সমস্যার বিস্তারিত বিবরণ এবং ভিডিওতে কীভাবে এটি আলোচিত হয়েছে]
@@ -682,7 +703,7 @@ async function executeVideoAnalysis(params: {
 সবকিছু বাংলা ভাষায় লিখুন এবং সুন্দর ও আকর্ষণীয় মার্কডাউন ফরম্যাটে সাজিয়ে দিন।`;
     } else if (mode === 'learning_points') {
       basePrompt = `ভিডিওর বিষয়বস্তু গভীরভাবে বিশ্লেষণ করে প্রধান শিক্ষণীয় বিষয় বা গুরুত্বপূর্ণ পয়েন্টগুলো (key learning points) চিহ্নিত করুন। প্রতিটি শিক্ষণীয় বিষয়ের গুরুত্ব (significance) এবং এটি কীভাবে বাস্তব জীবনে বা কর্মক্ষেত্রে প্রয়োগ করা যায় (practical application) তা বিস্তারিত ব্যাখ্যা করুন। নিম্নের কাঠামোগত বিন্যাসে বিশ্লেষণটি উপস্থাপন করুন:
-### [শিক্ষণীয় বিষয়ের শিরোনাম]
+### [Educative Title]
 - **মূল শিক্ষণীয় বিষয়**: [ভিডিও থেকে প্রাপ্ত প্রধান বার্তা, তত্ত্ব বা শিক্ষাটি বিস্তারিত ব্যাখ্যা করুন]
 - **এর গুরুত্ব ও তাৎপর্য (Significance)**: [কেন এই শিক্ষাটি গুরুত্বপূর্ণ এবং এটি জানলে কী উপকার হবে তা বিশ্লেষণ করুন]
 - **বাস্তব ক্ষেত্রে প্রয়োগ (Practical Application)**: [নিজের জীবন, ব্যবসা বা বাস্তব কোনো পরিস্থিতিতে এটি কীভাবে প্রয়োগ করবেন তার সুনির্দিষ্ট গাইডলাইন দিন]
@@ -696,7 +717,14 @@ async function executeVideoAnalysis(params: {
 সবকিছু বাংলা ভাষায় লিখুন। উত্তরটি সুন্দরভাবে ফরম্যাট করে দিন।`;
     }
   } else {
-    if (mode === 'problem_solving') {
+    if (mode === 'goal_category') {
+      basePrompt = `Analyze the video content to identify its core analysis objectives and category classification. Elaborate on its technical or thematic domain in detail. Present this analysis in the following structured format:
+### 🎯 Analysis Goal & Classification
+- **Core Analysis Objective**: [What is the primary target or core purpose of this video content]
+- **Category Classification**: [What specific category or domain this video belongs to (e.g. Tutorial, Entertainment, Engineering, Education) and why]
+- **Detailed Domain Analysis**: [Detailed evaluation of technologies, key concepts, or specific domain knowledge used in the video]
+Write everything in English. Use clean, highly professional, and polished markdown styling to organize the response.`;
+    } else if (mode === 'problem_solving') {
       basePrompt = `Analyze the video content to identify all discussed or visible problems. For each problem, provide potential solutions and actionable steps that can be taken. Present this analysis in a clear, highly structured format with sections for:
 ### [Problem Title/Header]
 - **Problem Detected**: [Detailed description of the issue and how it is discussed or presented in the video]
@@ -989,35 +1017,37 @@ async function executeAudioTranscription(params: AudioTranscriptionParams): Prom
 
   const parts: any[] = [];
 
-  const promptText = `You are a professional, high-accuracy verbatim speech-to-text audio transcriber.
-Your task is to transcribe the provided audio track verbatim and produce timestamped sentences/segments.
-Rules:
-1. Transcribe the spoken words accurately. If the audio is in Bengali, English, or mixed Bengali and English (Banglish / code-switching), transcribe verbatim in that natural script.
-2. Group into logical spoken segments or sentences (typically 2 to 10 seconds each).
-3. Mark each segment with:
-   - "start": exact start time in seconds (float or int, e.g. 0.0, 3.5, 12.0)
-   - "end": approximate end time in seconds (float or int)
-   - "timestamp": formatted MM:SS string (e.g. "00:00", "01:23")
-   - "speaker": speaker identification if discernible (e.g. "Speaker 1" or "বক্তা ১"), otherwise "Speaker"
-   - "text": the exact words spoken in this segment
-4. Produce a complete "fullText" string which is the entire continuous transcript suitable for keyword search.
-5. Identify "languageDetected" ("bn", "en", or "mixed").
-6. Provide a concise 1-sentence "summary" of the spoken conversation or narration.
+  const promptText = `You are a professional, high-accuracy VERBATIM speech-to-text audio transcriber.
+Your task is to transcribe the provided audio track 100% VERBATIM, word-for-word, and produce precise timestamped sentences/segments.
+
+CRITICAL RULES FOR VERBATIM ACCURACY:
+1. Write down the EXACT words spoken in the audio. DO NOT summarize, paraphrase, clean up, omit, or modify any words.
+2. DO NOT perform any translation or language conversion. If they speak in Bengali, write exact Bengali. If they speak in English, write exact English. If they speak in mixed Bengali-English (Banglish), write the mixed words exactly as spoken.
+3. Keep filler words, stuttering, and emotional cues exactly as spoken (e.g., "উম", "আম", "মানে", "uh", "um", "so") if they are present in the speech.
+4. DO NOT write an analysis or summary of what they are talking about inside the segments — write the verbatim spoken words of that specific timestamp.
+5. Group into logical spoken segments or sentences (typically 2 to 10 seconds each).
+
+Each segment MUST contain:
+- "start": exact start time in seconds (float or int, e.g. 0.0, 3.5, 12.0)
+- "end": approximate end time in seconds (float or int)
+- "timestamp": formatted MM:SS string (e.g. "00:00", "01:23")
+- "speaker": speaker identification if discernible (e.g. "Speaker 1" or "বক্তা ১"), otherwise "Speaker"
+- "text": the exact same-to-same spoken dialogue text in its original language (DO NOT replace with summaries!)
 
 CRITICAL: Return ONLY a valid JSON object matching this schema (do not wrap in markdown or commentary):
 {
-  "fullText": "Full transcript of the entire audio...",
+  "fullText": "Full 100% verbatim word-for-word transcript of the entire audio...",
   "segments": [
     {
       "start": 0.0,
       "end": 4.5,
       "timestamp": "00:00",
       "speaker": "Speaker 1",
-      "text": "spoken words..."
+      "text": "Exact verbatim spoken words..."
     }
   ],
   "languageDetected": "bn",
-  "summary": "Brief summary of spoken topic..."
+  "summary": "Brief 1-sentence summary of spoken topic..."
 }`;
 
   parts.push({ text: promptText });

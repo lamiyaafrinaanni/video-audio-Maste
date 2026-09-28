@@ -2,7 +2,7 @@ export type Language = 'bn' | 'en';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 
-export type AnalysisMode = 'standard' | 'problem_solving' | 'learning_points';
+export type AnalysisMode = 'standard' | 'problem_solving' | 'learning_points' | 'goal_category';
 
 export interface HighlightFrame {
   id: string;
